@@ -1,0 +1,21 @@
+# Compiled output — the Dockerfile builds fresh inside the container
+target/
+
+# Git history — not needed in the image
+.git/
+.gitignore
+
+# IDE / OS noise
+.idea/
+*.iml
+.DS_Store
+
+# Docs
+*.md
+design.md
+detailDesign.md
+
+# Docker files themselves (no need to copy them in)
+Dockerfile
+docker-compose.yml
+.dockerignore

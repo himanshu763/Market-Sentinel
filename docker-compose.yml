@@ -1,0 +1,59 @@
+services:
+
+  # ─────────────────────────────────────────────
+  #  Spring Boot app
+  # ─────────────────────────────────────────────
+  app:
+    build: .
+    container_name: market-sentinel-app
+    ports:
+      - "8080:8080"
+    environment:
+      # Overrides the localhost default in application.properties.
+      # The value "redis" is the service name below — Docker's
+      # internal DNS resolves it automatically.
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      redis:
+        condition: service_healthy   # wait until Redis is actually ready
+    restart: on-failure
+
+  # ─────────────────────────────────────────────
+  #  Redis cache
+  # ─────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: market-sentinel-redis
+    ports:
+      - "6379:6379"          # expose locally so you can redis-cli from host
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────
+  #  Kafka + Zookeeper  (Phase 3 — uncomment when
+  #  ready to migrate from CompletableFuture fan-out)
+  # ─────────────────────────────────────────────
+  # zookeeper:
+  #   image: confluentinc/cp-zookeeper:7.6.0
+  #   container_name: market-sentinel-zookeeper
+  #   environment:
+  #     ZOOKEEPER_CLIENT_PORT: 2181
+  #   restart: unless-stopped
+  #
+  # kafka:
+  #   image: confluentinc/cp-kafka:7.6.0
+  #   container_name: market-sentinel-kafka
+  #   depends_on: [zookeeper]
+  #   ports:
+  #     - "9092:9092"
+  #   environment:
+  #     KAFKA_BROKER_ID: 1
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #   restart: unless-stopped

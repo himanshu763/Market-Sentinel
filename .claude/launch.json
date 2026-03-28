@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Spring Boot (local)",
+      "runtimeExecutable": "./mvnw",
+      "runtimeArgs": ["spring-boot:run"],
+      "port": 8080
+    },
+    {
+      "name": "Docker — full stack (app + Redis)",
+      "runtimeExecutable": "docker-compose",
+      "runtimeArgs": ["up", "--build"],
+      "port": 8080
+    },
+    {
+      "name": "Docker — Redis only",
+      "runtimeExecutable": "docker-compose",
+      "runtimeArgs": ["up", "redis"],
+      "port": 6379
+    }
+  ]
+}
