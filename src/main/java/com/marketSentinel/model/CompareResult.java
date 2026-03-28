@@ -7,7 +7,8 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class CompareResult {
-    private String query;           // the original URL pasted
-    private List<RawProduct> results;  // one entry per platform
-    private String status;          // "complete" or "partial"
+    private String               query;            // original URL pasted
+    private List<PlatformResult> results;          // exact matches + source platform
+    private String               status;           // "complete" | "partial"
+    private List<PlatformResult> similarProducts;  // matches with matchType="similar"
 }

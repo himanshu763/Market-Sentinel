@@ -31,6 +31,15 @@ public class UrlParser {
         if (host.contains("blinkit")) {
             return new ProductIdentity("blinkit", extractBlinkitId(path), "ProductId", rawUrl);
         }
+        if (host.contains("zepto") || host.contains("zeptonow")) {
+            return new ProductIdentity("zepto", extractZeptoPvid(path), "ProductVariantId", rawUrl);
+        }
+        if (host.contains("myntra")) {
+            return new ProductIdentity("myntra", extractMyntraId(path), "ProductId", rawUrl);
+        }
+        if (host.contains("nykaa")) {
+            return new ProductIdentity("nykaa", extractNykaaId(path), "ProductId", rawUrl);
+        }
 
         throw new IllegalArgumentException("Unsupported platform: " + host);
     }
@@ -70,5 +79,47 @@ public class UrlParser {
             }
         }
         throw new IllegalArgumentException("Product ID not found in: " + path);
+    }
+
+    // Zepto URL: /pn/apple-iphone-15/pvid/abc-uuid-123
+    // We want the segment right after "pvid"
+    private String extractZeptoPvid(String path) {
+        String[] parts = path.split("/");
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].equals("pvid") && i + 1 < parts.length) {
+                return parts[i + 1];
+            }
+        }
+        throw new IllegalArgumentException("Product variant ID not found in: " + path);
+    }
+
+    // Myntra URL: /{category}/{brand}/{product-name}/{id}/buy
+    // The numeric ID is the segment immediately before "buy"
+    private String extractMyntraId(String path) {
+        String[] parts = path.split("/");
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].equals("buy") && i > 0) {
+                return parts[i - 1];
+            }
+        }
+        // Fallback: last purely numeric segment
+        for (int i = parts.length - 1; i >= 0; i--) {
+            if (parts[i].matches("\\d+")) {
+                return parts[i];
+            }
+        }
+        throw new IllegalArgumentException("Product ID not found in Myntra path: " + path);
+    }
+
+    // Nykaa URL: /{product-slug}/p/{id}?skuId=...
+    // We want the segment right after "p"
+    private String extractNykaaId(String path) {
+        String[] parts = path.split("/");
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].equals("p") && i + 1 < parts.length) {
+                return parts[i + 1];
+            }
+        }
+        throw new IllegalArgumentException("Product ID not found in Nykaa path: " + path);
     }
 }

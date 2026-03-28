@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn compile:*)",
+      "Bash(./mvnw compile:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.zeptonow.com)",
+      "WebFetch(domain:www.zepto.com)",
+      "WebFetch(domain:nextract.dev)",
+      "Bash(nslookup api.zepto.com)",
+      "Bash(nslookup www.zepto.com)",
+      "Bash(nslookup api.zeptonow.com)",
+      "Bash(nslookup cdn.zeptonow.com)",
+      "Bash(nslookup cdn.bff.zeptonow.com)",
+      "Bash(getent hosts:*)",
+      "WebFetch(domain:api.zeptonow.com)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\" -H \"User-Agent: Mozilla/5.0\" \"https://api.zepto.co.in/api/v2/store/select/?latitude=28.7041&longitude=77.1025\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\" -H \"User-Agent: Mozilla/5.0\" \"https://apiproxy.zepto.com/api/v2/store/select/?latitude=28.7041&longitude=77.1025\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\" -H \"User-Agent: Mozilla/5.0\" \"https://api-prod.zepto.com/api/v2/store/select/?latitude=28.7041&longitude=77.1025\")",
+      "Bash(curl -s -w \"\\\\n%{http_code}\" \"https://bff-gateway.zepto.com/lms/api/v2/get_page?latitude=28.7041&longitude=77.1025&page_type=SEARCH&version=v2&enforce_platform_type=DESKTOP&query=milk\" -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/146.0.0.0 Safari/537.36\" -H \"Accept: application/json, text/plain, */*\" -H \"appversion: 14.37.0\" -H \"platform: WEB\" -H \"tenant: ZEPTO\" -H \"store_id: b4dc8d65-ed2e-4142-81b6-373982b13500\" -H \"Origin: https://www.zepto.com\" -H \"Referer: https://www.zepto.com/\")",
+      "Bash(curl -s \"https://bff-gateway.zepto.com/lms/api/v2/get_page?latitude=12.96902&longitude=77.75395&page_type=SEARCH&version=v2&enforce_platform_type=DESKTOP&search_query=milk&page_size=10\" -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/146.0.0.0 Safari/537.36\" -H \"Accept: application/json, text/plain, */*\" -H \"appversion: 14.37.0\" -H \"app_version: 14.37.0\" -H \"app_sub_platform: WEB\" -H \"platform: WEB\" -H \"tenant: ZEPTO\" -H \"store_id: b4dc8d65-ed2e-4142-81b6-373982b13500\" -H \"storeid: b4dc8d65-ed2e-4142-81b6-373982b13500\" -H \"store_ids: b4dc8d65-ed2e-4142-81b6-373982b13500,0059ff6a-7eb0-477a-a7f5-69256f2c444b\" -H \"marketplace_type: SUPER_SAVER\" -H \"device_id: cd315f02-0937-4127-a412-eb58464a6060\" -H \"deviceid: cd315f02-0937-4127-a412-eb58464a6060\" -H \"session_id: e89acdbc-0682-4f47-abc5-06fba0b462eb\" -H \"sessionid: e89acdbc-0682-4f47-abc5-06fba0b462eb\" -H \"source: DIRECT\" -H \"Origin: https://www.zepto.com\" -H \"Referer: https://www.zepto.com/\")",
+      "Bash(python3 -c \":*)"
+    ]
+  }
+}
