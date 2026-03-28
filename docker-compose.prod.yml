@@ -1,20 +1,30 @@
 services:
 
   # ─────────────────────────────────────────────
-  #  Spring Boot app
-  #  APP_IMAGE is injected by the CI/CD pipeline
-  #  (written to .env before docker compose up).
+  #  React frontend (Nginx)
+  #  Serves the UI on port 80 and proxies
+  #  /api/* to the Spring Boot backend.
+  # ─────────────────────────────────────────────
+  frontend:
+    image: ${FRONTEND_IMAGE:-ghcr.io/himanshu763/market-sentinel-ui:latest}
+    container_name: market-sentinel-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────
+  #  Spring Boot backend
   # ─────────────────────────────────────────────
   app:
-    image: ${APP_IMAGE:-ghcr.io/your-github-username/market-sentinel:latest}
+    image: ${APP_IMAGE:-ghcr.io/himanshu763/market-sentinel:latest}
     container_name: market-sentinel-app
     ports:
       - "8080:8080"
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      # Keeps the JVM inside t2.micro's 1 GB RAM budget.
-      # Spring Boot + Redis together sit ~500 MB peak, leaving ~500 MB headroom.
       JAVA_TOOL_OPTIONS: "-Xmx384m -Xms256m"
     depends_on:
       redis:
@@ -27,8 +37,6 @@ services:
   redis:
     image: redis:7-alpine
     container_name: market-sentinel-redis
-    # Don't expose 6379 to the internet on a prod server —
-    # only the app container needs to reach it.
     expose:
       - "6379"
     healthcheck:
