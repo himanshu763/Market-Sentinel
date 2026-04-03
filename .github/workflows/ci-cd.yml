@@ -44,8 +44,8 @@ jobs:
 # ─────────────────────────────────────────────────────────
 #  JOB 2 — Build & push backend image
 # ─────────────────────────────────────────────────────────
-  build-backend:
-    name: Build Backend
+  build:
+    name: Build
     runs-on: ubuntu-latest
     needs: test
     if: github.event_name == 'push'
@@ -86,61 +86,18 @@ jobs:
 
 
 # ─────────────────────────────────────────────────────────
-#  JOB 3 — Build & push frontend image
-# ─────────────────────────────────────────────────────────
-  build-frontend:
-    name: Build Frontend
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'push'
-
-    permissions:
-      contents: read
-      packages: write
-
-    outputs:
-      image: ${{ steps.meta.outputs.image }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Lowercase image name
-        id: meta
-        run: |
-          OWNER="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
-          IMAGE="ghcr.io/${OWNER}/market-sentinel-ui"
-          echo "image=${IMAGE}" >> $GITHUB_OUTPUT
-
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: docker/setup-buildx-action@v3
-
-      - uses: docker/build-push-action@v5
-        with:
-          context: ./frontend       # build from the frontend/ subdirectory
-          push: true
-          tags: |
-            ${{ steps.meta.outputs.image }}:latest
-            ${{ steps.meta.outputs.image }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to:   type=gha,mode=max
-
-
-# ─────────────────────────────────────────────────────────
-#  JOB 4 — Deploy both to EC2
+#  JOB 3 — Deploy backend to EC2
+#  Only updates the app container — frontend is deployed
+#  independently from the OmniKart-UI repo.
 # ─────────────────────────────────────────────────────────
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    needs: [build-backend, build-frontend]
+    needs: build
     if: github.event_name == 'push'
 
     steps:
-      - name: Deploy to EC2 via SSH
+      - name: Deploy backend to EC2 via SSH
         uses: appleboy/ssh-action@v1
         with:
           host:     ${{ secrets.EC2_HOST }}
@@ -152,21 +109,22 @@ jobs:
             mkdir -p ~/market-sentinel
             cd ~/market-sentinel
 
-            # Write both image tags into .env
-            cat > .env <<EOF
-            APP_IMAGE=${{ needs.build-backend.outputs.image }}:${{ github.sha }}
-            FRONTEND_IMAGE=${{ needs.build-frontend.outputs.image }}:${{ github.sha }}
-            EOF
+            # Update only the backend image tag — leave FRONTEND_IMAGE untouched
+            if [ -f .env ]; then
+              sed -i "s|^APP_IMAGE=.*|APP_IMAGE=${{ needs.build.outputs.image }}:${{ github.sha }}|" .env
+            else
+              echo "APP_IMAGE=${{ needs.build.outputs.image }}:${{ github.sha }}" > .env
+            fi
 
             # Fetch latest prod compose from repo
             curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/master/docker-compose.prod.yml \
               -o docker-compose.prod.yml
 
-            # Login and deploy
+            # Login, pull new backend image, restart only the app container
             echo "${{ secrets.GITHUB_TOKEN }}" \
               | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker compose -f docker-compose.prod.yml pull app
+            docker compose -f docker-compose.prod.yml up -d --no-deps app
 
             docker image prune -f
